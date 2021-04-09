@@ -14,15 +14,16 @@ const float FRAME_TIME = 10.0F; /* in ms. */
  */
 
 const char *state_str[] = {
-  "UNDEF", "S", "V", "INIT"
-};
+    "UNDEF", "S", "V", "INIT"};
 
-const char *state2str(VAD_STATE st) {
+const char *state2str(VAD_STATE st)
+{
   return state_str[st];
 }
 
 /* Define a datatype with interesting features */
-typedef struct {
+typedef struct
+{
   float zcr;
   float p;
   float am;
@@ -31,8 +32,11 @@ typedef struct {
 /* 
  * TODO: Delete and use your own features!
  */
+float medPot=0.0;
+int contador=0;
 
-Features compute_features(const float *x, int N) {
+Features compute_features(const float *x, int N)
+{
   /*
    * Input: x[i] : i=0 .... N-1 
    * Ouput: computed features
@@ -46,7 +50,7 @@ Features compute_features(const float *x, int N) {
   //feat.zcr = feat.p = feat.am = (float) rand()/RAND_MAX;
   feat.zcr = compute_zcr(x, N, 16000);
   feat.p = compute_power(x, N);
-  feat.am = compute_am(x,N);
+  feat.am = compute_am(x, N);
 
   return feat;
 }
@@ -55,7 +59,8 @@ Features compute_features(const float *x, int N) {
  * TODO: Init the values of vad_data
  */
 
-VAD_DATA * vad_open(float rate, float alfa0) {
+VAD_DATA *vad_open(float rate, float alfa0)
+{
   VAD_DATA *vad_data = malloc(sizeof(VAD_DATA));
   vad_data->state = ST_INIT;
   vad_data->alfa0 = alfa0;
@@ -64,7 +69,8 @@ VAD_DATA * vad_open(float rate, float alfa0) {
   return vad_data;
 }
 
-VAD_STATE vad_close(VAD_DATA *vad_data) {
+VAD_STATE vad_close(VAD_DATA *vad_data)
+{
   /* 
    * TODO: decide what to do with the last undecided frames
    */
@@ -74,7 +80,8 @@ VAD_STATE vad_close(VAD_DATA *vad_data) {
   return state;
 }
 
-unsigned int vad_frame_size(VAD_DATA *vad_data) {
+unsigned int vad_frame_size(VAD_DATA *vad_data)
+{
   return vad_data->frame_length;
 }
 
@@ -83,7 +90,8 @@ unsigned int vad_frame_size(VAD_DATA *vad_data) {
  * using a Finite State Automata
  */
 
-VAD_STATE vad(VAD_DATA *vad_data, float *x) {
+VAD_STATE vad(VAD_DATA *vad_data, float *x)
+{
 
   /* 
    * TODO: You can change this, using your own features,
@@ -93,10 +101,18 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
   Features f = compute_features(x, vad_data->frame_length);
   vad_data->last_feature = f.p; /* save feature, in case you want to show */
 
-  switch (vad_data->state) {
+  switch (vad_data->state)
+  {
   case ST_INIT:
-    vad_data->k0 = f.p + vad_data->alfa0;
-    vad_data->state = ST_SILENCE;
+    medPot = medPot + 10 ^ (f.p / 10);
+    contador++;
+    if (contador == 10)
+    {
+      k0 = medPot / contador;
+      k0 = 10 * log10(k1);
+      vad_data->k1 = k0 + vad_data->alfa0;
+      vad_data->state = ST_SILENCE;
+    }
     break;
 
   case ST_SILENCE:
@@ -120,6 +136,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
     return ST_UNDEF;
 }
 
-void vad_show_state(const VAD_DATA *vad_data, FILE *out) {
+void vad_show_state(const VAD_DATA *vad_data, FILE *out)
+{
   fprintf(out, "%d\t%f\n", vad_data->state, vad_data->last_feature);
 }

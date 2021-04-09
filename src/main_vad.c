@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
 
     if (sndfile_out != 0) {
       /* TODO: copy all the samples into sndfile_out */
+      sf_write_float(sndfile_out, buffer, frame_size)
     }
 
     state = vad(vad_data, buffer);
@@ -88,14 +89,19 @@ int main(int argc, char *argv[]) {
     /* TODO: print only SILENCE and VOICE labels */
     /* As it is, it prints UNDEF segments but is should be merge to the proper value */
     if (state != last_state) {
-      if (t != last_t)
+      if (t != last_t  && last_state!=ST_INIT && state != ST_UNDEF) {
         fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
-      last_state = state;
-      last_t = t;
+        last_t = t;
+      }
+      if(state != ST_UNDEF) {
+         last_state = state;
+         
+      }
     }
 
     if (sndfile_out != 0) {
-      /* TODO: go back and write zeros in silence segments */
+      if(state == ST_SILENCE)
+        sf_write_float(sndfile_out, buffer_zeros, frame_size)  
     }
   }
 
