@@ -120,14 +120,51 @@ JAVI
 
 - Complete el código de los ficheros de la práctica para implementar un detector de actividad vocal tan
   exacto como sea posible. Tome como objetivo la maximización de la puntuación-F `TOTAL`.
- JOAN
+  
+ **vad.c**
+ 
+ Para empezar, hacemos los cambios necesarios en *vad.c*, primero, definimos las *features* y las inicializamos:
+ ![image](https://user-images.githubusercontent.com/80445439/114268495-b0653680-9a01-11eb-9c67-5f213b784729.png)
+ 
+ Editamos la función *vad_close* que usaremos más tarde en el main, haremos que simplemente returne el último estado y que libere la data.
+ 
+![image](https://user-images.githubusercontent.com/80445439/114270415-751c3500-9a0c-11eb-8695-0e3e15d0cbb8.png)
+
+ 
+ Después, completaremos una de las funciones más importantes del programa, *VAD_STATE vad*, donde le pasaremos la data, el buffer, y el último estado. Esta función se hará cargo de los cambios de estado (inicial, indefinido, voz y silencio), calculando previamente los parametros *k0, k1 y k2* que serán los decisores de los cambios que realizaremos. Finalmente nos returnará el estado en el que estamos.
+
+![image](https://user-images.githubusercontent.com/80445439/114269698-bd395880-9a08-11eb-9e07-0cb80fd36865.png)
+
+![image](https://user-images.githubusercontent.com/80445439/114269713-ca564780-9a08-11eb-99e9-8d63235dbb55.png)
+
+Como podemos ver, en el caso de estar en el estado inicial, calcularemos primero k0, usando la potencia y un contador de 12 tramas. A partir de k0 podremos calcular k1 (sumándole 3dB) y k2 la encontraremos sumándole 7dB a k1. Después del estado inicial, siempre pasaremos a estado de silencio.
+
+Seguidamente, en caso de estar en silencio, simplemente comprobaremos que la potencia supera el nivel de k1, y, en caso de que no lo supere, pasaremos a estado indefinido, concretamente, *maybe voice*.
+
+Después, con una estructura muy similar, en el estado de voz, comprobaremos que la potencia no esté por debajo de k1, en caso de que lo esté, pasaremos a estado indefinido, concretamente, *maybe silence*.
+
+Finalmente, el estado indefinido lo dividiremos en los casos de posiblidad de voz y de silencio. En el caso de *maybe voice* comprobamos si se supera la potencia k2, para pasar a estado de voz, si no lo hace en cierto tiempo, volveremos a silencio. En el caso de *maybe silence*, también comprobaremos si superamos k2 para pasar al estado de voz, y luego que se no supere *k1+4* durante un cierto tiempo, para pasar al estado de silencio.
+
+Una vez decidido el estado, lo returnamos.
+
+**main_vad.c**
+
+Con estos cambios, dejamos finalizado el *vad.c*. Ahora necesitamos editar el *main_vad.c* para que deje escritas las tramas de voz o silencio.
+![image](https://user-images.githubusercontent.com/80445439/114270108-e6f37f00-9a0a-11eb-8a8f-dd3c24df0190.png)
+![image](https://user-images.githubusercontent.com/80445439/114270113-ee1a8d00-9a0a-11eb-91ca-79076969c5f4.png)
+
+Como podemos observar, iteramos trama a trama por todo el fichero de audio. Después de hacer las comprobaciones básicas, tenemos que escribir en el fichero el estado definido, pero solo si es de voz o de silencio, para ello comprobamos el último estado y la última trama en la cual hemos "escrito", antes de escribir nos aseguramos que no estamos en el estado indefinido ni inicial, de esta forma confirmaremos que solo se escriben los estados que hemos indicado.
+
+Para la última trama, tendremos que comprobar no haberla escrito ya, y después simplemente copiar el último estado elegido.
 
 - Inserte una gráfica en la que se vea con claridad la señal temporal, el etiquetado manual y la detección
   automática conseguida para el fichero grabado al efecto. 
 JAVI
 
 - Explique, si existen. las discrepancias entre el etiquetado manual y la detección automática.
-JOAN
+
+	Como era de esperar, el programa no es 100% preciso, aunque los valores de *k0, k1 y k2* estén bien elegidos y sean prácticamente óptimos, no podemos asegurar que los resultados sean exactamente correctos. Principalmente porque para hacerlo a la perfección necesitaríamos más parámetros y una programación más compleja, aunque, aun así, seguramente seguriría sin ser 100% preciso por factores externos, como, por ejemplo, algún error manual al etiquetar el audio con voz y sonido, entre otros.
+
 - Evalúe los resultados sobre la base de datos `db.v4` con el script `vad_evaluation.pl` e inserte a 
   continuación las tasas de sensibilidad (*recall*) y precisión para el conjunto de la base de datos (sólo
   el resumen).
@@ -150,10 +187,13 @@ JAVI
 
 - Indique a continuación si ha realizado algún tipo de aportación suplementaria (algoritmos de detección o 
   parámetros alternativos, etc.).
-	JOAN
+  
+  Para conseguir unos mejores resultados, hemos usado los parámetros k0, k1 y k2. Siendo k0 la potencia media de las tramas iniciales, y k1 y k2 los parámetros decisores del cambio de estados. Hemos realizado tests hasta encontrar los valores óptimos para sumarle a k0 y conseguir k1 y k2 que nos permitan tener una buena precisión en nuestros resultados.
+  
 - Si lo desea, puede realizar también algún comentario acerca de la realización de la práctica que
   considere de interés de cara a su evaluación.
-  JOAN
+  
+  Para poder acabar de implementar el código escrito, y conseguir solucionar problemas mínimos que impedían la compilación del programa, hemos añadido código para que escriba por pantalla ciertos puntos clave para entender donde estaban los errores y corregirlos fácilmente.
 
 
 ### Antes de entregar la práctica
