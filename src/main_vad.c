@@ -80,10 +80,10 @@ int main(int argc, char *argv[]) {
 
     if (sndfile_out != 0) {
       /* TODO: copy all the samples into sndfile_out */
-      sf_write_float(sndfile_out, buffer, frame_size)
+      sf_write_float(sndfile_out, buffer, frame_size);
     }
 
-    state = vad(vad_data, buffer);
+    state = vad(vad_data, buffer, last_state);
     if (verbose & DEBUG_VAD) vad_show_state(vad_data, stdout);
 
     /* TODO: print only SILENCE and VOICE labels */
@@ -91,6 +91,7 @@ int main(int argc, char *argv[]) {
     if (state != last_state) {
       if (t != last_t  && last_state!=ST_INIT && state != ST_UNDEF) {
         fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
+        printf( "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
         last_t = t;
       }
       if(state != ST_UNDEF) {
@@ -101,15 +102,16 @@ int main(int argc, char *argv[]) {
 
     if (sndfile_out != 0) {
       if(state == ST_SILENCE)
-        sf_write_float(sndfile_out, buffer_zeros, frame_size)  
+        sf_write_float(sndfile_out, buffer_zeros, frame_size);
     }
   }
 
-  state = vad_close(vad_data);
+  state = vad_close(vad_data, last_state);
   /* TODO: what do you want to print, for last frames? */
-  if (t != last_t)
+  if (t != last_t)  {
     fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration + n_read / (float) sf_info.samplerate, state2str(state));
-
+    printf( "ultimas tramas: %.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration + n_read / (float) sf_info.samplerate, state2str(state));
+  }
   /* clean up: free memory, close open files */
   free(buffer);
   free(buffer_zeros);

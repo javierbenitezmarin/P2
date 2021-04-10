@@ -6,6 +6,8 @@
 #include "vad.h"
 
 const float FRAME_TIME = 10.0F; /* in ms. */
+const int MAX_MAYBEVOICE = 5;
+const int MAX_MAYBESILENCE = 8;
 
 /* 
  * As the output state is only ST_VOICE, ST_SILENCE, or ST_UNDEF,
@@ -34,6 +36,7 @@ typedef struct
  */
 float medPot=0.0;
 int contador=0;
+float k2=0; float k0 = 0;
 
 Features compute_features(const float *x, int N)
 {
@@ -69,12 +72,9 @@ VAD_DATA *vad_open(float rate, float alfa0)
   return vad_data;
 }
 
-VAD_STATE vad_close(VAD_DATA *vad_data)
+VAD_STATE vad_close(VAD_DATA *vad_data, VAD_STATE last_state)
 {
-  /* 
-   * TODO: decide what to do with the last undecided frames
-   */
-  VAD_STATE state = vad_data->state;
+  VAD_STATE state = last_state;
 
   free(vad_data);
   return state;
@@ -90,7 +90,7 @@ unsigned int vad_frame_size(VAD_DATA *vad_data)
  * using a Finite State Automata
  */
 
-VAD_STATE vad(VAD_DATA *vad_data, float *x)
+VAD_STATE vad(VAD_DATA *vad_data, float *x, VAD_STATE last_state)
 {
 
   /* 
@@ -104,33 +104,69 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
   switch (vad_data->state)
   {
   case ST_INIT:
-    medPot = medPot + 10 ^ (f.p / 10);
+    medPot = medPot + pow(10,(f.p / 10));
     contador++;
-    if (contador == 10)
+    if (contador == 12)
     {
       k0 = medPot / contador;
-      k0 = 10 * log10(k1);
-      vad_data->k1 = k0 + vad_data->alfa0;
+      k0 = 10 * log10(k0);
+      vad_data->k1 = k0 + 3;
+      printf("He tardado %f en calcular k0\n y el valor de k1 es %f\n", contador * FRAME_TIME, vad_data->k1);
+      k2 = vad_data->k1 + 7;
       vad_data->state = ST_SILENCE;
+      printf("He cambiado de ST_INIT a ST_SILENCE");
+      contador = 0;
     }
     break;
 
   case ST_SILENCE:
-    if (f.p > vad_data->k0) //f.p indica la potencia de la trama
-      vad_data->state = ST_VOICE;
+    if (f.p > vad_data->k1) {//f.p indica la potencia de la trama
+      vad_data->state = ST_UNDEF;
+      printf("He cambiado de ST_SILENCE a UNDEF (MAYBE VOICE)");
+    }
     break;
 
   case ST_VOICE:
-    if (f.p < vad_data->k0)
-      vad_data->state = ST_SILENCE;
+    if (f.p < vad_data->k1) {
+      vad_data->state = ST_UNDEF;
+      printf("He cambiado de ST_VOICE a UNDEF (MAYBE SILENCE)");
+    }
     break;
 
   case ST_UNDEF:
+        if (last_state == ST_SILENCE){
+          // --------- MAYBE VOICE ------------
+          if(f.p > k2) {
+            vad_data->state = ST_VOICE;
+            printf("He cambiado de UNDEF(MAYBE VOICE) a VOICE \n");
+            contador = 0; 
+          }
+          else if(contador >= MAX_MAYBEVOICE || f.p < vad_data->k1){
+            vad_data->state = ST_SILENCE;
+            printf("He cambiado de UNDEF(MAYBE VOICE) a SILENCE \n");
+            contador = 0;
+          }
+          else contador++;
+        }
+        else if(last_state == ST_VOICE){
+          // ----------- MAYBE SILENCE -------------
+          if(f.p >  k2){
+            vad_data->state = ST_VOICE;
+            printf("He cambiado de MAYBE SILENCE a VOICE\n");
+            contador = 0;
+          } else if (f.p < vad_data->k1 + 4 && contador >= MAX_MAYBESILENCE){
+            vad_data->state = ST_SILENCE;
+            printf("He cambiado de MAYBE SILENCE a SILENCE\n");
+            contador = 0;
+          }  else contador++;
+          }
+        
+
     break;
   }
 
   if (vad_data->state == ST_SILENCE ||
-      vad_data->state == ST_VOICE)
+      vad_data->state == ST_VOICE || vad_data->state == ST_INIT)
     return vad_data->state;
   else
     return ST_UNDEF;
