@@ -106,7 +106,7 @@ Ejercicios
   potencia y la tasa de cruces por cero, junto con el etiquetado manual de los segmentos.
 
 Etiquetado manual de los segmentos, capturando también el contorno de potencia y la tasa de cruces por cero:
-
+![imagen](https://user-images.githubusercontent.com/80445330/114296932-2cb55380-9aae-11eb-802b-53e4ed426b09.png)
 Vemos, aproximadamente, que el nivel de potencia en el primer segmento de silencio, es de unos -6 dB. Y la tasa de cruces por cero, es equivalente a 8000;
 
 - A la vista de la gráfica, indique qué valores considera adecuados para las magnitudes siguientes:
@@ -168,7 +168,13 @@ Para la última trama, tendremos que comprobar no haberla escrito ya, y después
 
 - Inserte una gráfica en la que se vea con claridad la señal temporal, el etiquetado manual y la detección
   automática conseguida para el fichero grabado al efecto. 
-JAVI
+
+![imagen](https://user-images.githubusercontent.com/80445330/114297018-9b92ac80-9aae-11eb-90c5-8b39ec4148ba.png)
+En esta gráfica tomada con wavesurfer, vemos:
+	- La señal temporal, en el panel inferior
+	- La potencia de la señal, en el próximo panel superior
+	- Nuestro etiquetado manual .lab, en el próximo panel superior
+	- El etiquetado .vad que ha generado nuestro programa, en el panel superior
 
 - Explique, si existen. las discrepancias entre el etiquetado manual y la detección automática.
 
@@ -177,7 +183,10 @@ JAVI
 - Evalúe los resultados sobre la base de datos `db.v4` con el script `vad_evaluation.pl` e inserte a 
   continuación las tasas de sensibilidad (*recall*) y precisión para el conjunto de la base de datos (sólo
   el resumen).
-JAVI
+
+	Al ejecutar el script, obtenemos los siguientes resultados:
+![imagen](https://user-images.githubusercontent.com/80445330/114297136-368b8680-9aaf-11eb-9d43-629441efadac.png)
+
 ### Trabajos de ampliación
 
 #### Cancelación del ruido en los segmentos de silencio
