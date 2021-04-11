@@ -171,10 +171,10 @@ Para la última trama, tendremos que comprobar no haberla escrito ya, y después
 
 ![imagen](https://user-images.githubusercontent.com/80445330/114297018-9b92ac80-9aae-11eb-90c5-8b39ec4148ba.png)
 En esta gráfica tomada con wavesurfer, vemos:
-	- La señal temporal, en el panel inferior \n
-	- La potencia de la señal, en el próximo panel superior \n
-	- Nuestro etiquetado manual .lab, en el próximo panel superior \n
-	- El etiquetado .vad que ha generado nuestro programa, en el panel superior \n
+	- La señal temporal, en el panel inferior.
+	- La potencia de la señal, en el próximo panel superior.
+	- Nuestro etiquetado manual .lab, en el próximo panel superior.
+	- El etiquetado .vad que ha generado nuestro programa, en el panel superior.
 
 - Explique, si existen. las discrepancias entre el etiquetado manual y la detección automática.
 
