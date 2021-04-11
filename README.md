@@ -171,6 +171,7 @@ Para la última trama, tendremos que comprobar no haberla escrito ya, y después
 
 ![imagen](https://user-images.githubusercontent.com/80445330/114297018-9b92ac80-9aae-11eb-90c5-8b39ec4148ba.png)
 En esta gráfica tomada con wavesurfer, vemos:
+
 	- La señal temporal, en el panel inferior.
 	- La potencia de la señal, en el próximo panel superior.
 	- Nuestro etiquetado manual .lab, en el próximo panel superior.
