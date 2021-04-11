@@ -104,17 +104,26 @@ Ejercicios
 - Etiquete manualmente los segmentos de voz y silencio del fichero grabado al efecto. Inserte, a 
   continuación, una captura de `wavesurfer` en la que se vea con claridad la señal temporal, el contorno de
   potencia y la tasa de cruces por cero, junto con el etiquetado manual de los segmentos.
-JAVI
+
+Etiquetado manual de los segmentos, capturando también el contorno de potencia y la tasa de cruces por cero:
+
+Vemos, aproximadamente, que el nivel de potencia en el primer segmento de silencio, es de unos -6 dB. Y la tasa de cruces por cero, es equivalente a 8000;
 
 - A la vista de la gráfica, indique qué valores considera adecuados para las magnitudes siguientes:
 
 	* Incremento del nivel potencia en dB, respecto al nivel correspondiente al silencio inicial, para
 	  estar seguros de que un segmento de señal se corresponde con voz.
+	  
+	Haciendo un estudio inicial, deducimos que una diferencia de 30dB tendría que ser suficiente para discernir un segmento de voz, de uno con silencio.
+	Obviamente, más tarde nos damos cuenta que esta diferencia es demasiado alta, y para programar nuestro autómata de estados, acabamos utilizando una 		diferencia mucho menor.
 
 	* Duración mínima razonable de los segmentos de voz y silencio.
 
+	Determinamos unos 150ms para la duración mínima de un silencio, y unos 550 ms para voz.
+	
 	* ¿Es capaz de sacar alguna conclusión a partir de la evolución de la tasa de cruces por cero?
-JAVI
+
+	La tasa de cruces por cero nos es muy útil para diferenciar sonidos sordos de sonoros. Como bien sabemos, un sonido sonoro tiene un espectro centrado en 	 bajas frecuencias y uno sordo tiene un componente en frecuencias muy superiores. Cuando la tasa de cruces es elevada, estaremos en un segmento de la señal 	    con un contenido frecuencial muy grande. Esto nos podría ser útil si decidimos extender el programa para clasificar, dentro de un segmento de voz, el tipo de 	  sonidos que este contiene.
 
 ### Desarrollo del detector de actividad vocal
 
