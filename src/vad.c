@@ -122,14 +122,14 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, VAD_STATE last_state)
   case ST_SILENCE:
     if (f.p > vad_data->k1) {//f.p indica la potencia de la trama
       vad_data->state = ST_UNDEF;
-      printf("He cambiado de ST_SILENCE a UNDEF (MAYBE VOICE)");
+      printf("He cambiado de ST_SILENCE a UNDEF (MAYBE VOICE)\n");
     }
     break;
 
   case ST_VOICE:
     if (f.p < vad_data->k1) {
       vad_data->state = ST_UNDEF;
-      printf("He cambiado de ST_VOICE a UNDEF (MAYBE SILENCE)");
+      printf("He cambiado de ST_VOICE a UNDEF (MAYBE SILENCE)\n");
     }
     break;
 
